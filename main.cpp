@@ -1081,12 +1081,15 @@ int main(int argc, const char** argv) {
 			}
 
 			const auto envGameSpeed = get_env_var("BWHEADLESS_GAME_SPEED");
-			const auto parsedGameSpeed = GameSpeed::parse(envGameSpeed);
-			if (parsedGameSpeed.has_value()) {
-				opt_game_speed = parsedGameSpeed.value();
-			} else {
-				log("%s: error: failed to parse environment variable: BWHEADLESS_GAME_SPEED: %s\n", argv[0], envGameSpeed);
-				fatal_error("failed to parse environment variable: BWHEADLESS_GAME_SPEED");
+			if (envGameSpeed.length() > 0) {
+				const auto parsedGameSpeed = GameSpeed::parse(envGameSpeed);
+				if (parsedGameSpeed.has_value()) {
+					opt_game_speed = parsedGameSpeed.value();
+				}
+				else {
+					log("%s: error: failed to parse environment variable: BWHEADLESS_GAME_SPEED: %s\n", argv[0], envGameSpeed);
+					fatal_error("failed to parse environment variable: BWHEADLESS_GAME_SPEED");
+				}
 			}
 
 			int r = parse_args(argc, argv.data());
