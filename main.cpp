@@ -12,8 +12,8 @@
 #include <mutex>
 
 #include "sc_hook.h"
-
 #include "strf.h"
+#include "game_speed.h"
 
 template<typename...T>
 std::string format(const char*fmt, T&&...args) {
@@ -88,6 +88,14 @@ std::string get_full_pathname(const char* path) {
 }
 std::string get_full_pathname(const std::string& path) {
 	return get_full_pathname(path.c_str());
+}
+
+// Assumes no unicode, ASCII only
+inline std::string get_env_var(const char *var) {
+	const unsigned long bufSize = (1 << 15) - 1;
+	char buf[bufSize];
+	const unsigned ignore = GetEnvironmentVariableA(var, buf, bufSize);
+	return std::string(buf);
 }
 
 int InitializeNetworkProvider(int id) {
@@ -253,6 +261,7 @@ std::string opt_network_provider = "SMEM";
 uint32_t opt_lan_sendto = 0;
 std::string opt_installpath;
 bool opt_headful = false;
+int opt_game_speed = GameSpeed::FASTEST.intValue();
 
 void run() {
 
@@ -340,7 +349,7 @@ void run() {
 
 		offset<uint8_t>(&create_info, 0x24) = 1; // active player count
 		offset<uint8_t>(&create_info, 0x25) = players_count;
-		offset<uint8_t>(&create_info, 0x26) = 6; // game speed
+		offset<uint8_t>(&create_info, 0x26) = opt_game_speed; // game speed
 		offset<uint8_t>(&create_info, 0x27) = 1; // game state?
 		offset<uint32_t>(&create_info, 0x28) = game_type; // game type (melee)
 		offset<uint16_t>(&create_info, 0x30) = g_tileset;
@@ -386,6 +395,9 @@ void run() {
 		g_is_host = 1;
 
 		log("game hosted\n");
+
+		const auto parsedGameSpeed = GameSpeed::parse(opt_game_speed);
+		log("game speed: %d%s\n", opt_game_speed, (parsedGameSpeed.has_value() ? " (" + parsedGameSpeed.value() + ")" : ""));
 
 	} else {
 
@@ -933,6 +945,7 @@ int parse_args(int argc, const char** argv) {
 		log("  -r, --race RACE   Zerg/Terran/Protoss/Random/Z/T/P/R (case insensitive).\n");
 		log("  -l, --dll DLL     Load DLL into StarCraft. This option can be\n");
 		log("                    specified multiple times to load multiple dlls.\n");
+		log("      --gamespeed GAMESPEED  SLOWEST/SLOWER/SLOW/NORMAL/FAST/FASTER/FASTEST (case insensitive).\n");
 		log("      --networkprovider NAME  Use the specified network provider.\n");
 		log("                              'UDPN' is LAN (UDP), 'SMEM' is Local PC (provided\n");
 		log("                              by BWAPI). Others are provided by .snp files and\n");
@@ -983,6 +996,16 @@ int parse_args(int argc, const char** argv) {
 		} else if (!strcmp(s, "--help")) {
 			usage();
 			return -1;
+		} else if (!strcmp(s, "--gamespeed")) {
+			const auto gameSpeedArg = std::string(parm());
+			const auto parsedGameSpeed = GameSpeed::parse(gameSpeedArg);
+			if (parsedGameSpeed.has_value()) {
+				opt_game_speed = parsedGameSpeed.value();
+			} else {
+				log("%s: error: invalid game speed: '%s'\n", argv[0], gameSpeedArg);
+				log("Use --help to see a list of valid arguments.\n");
+				failed = true;
+			}
 		} else if (!strcmp(s, "--dll") || !strcmp(s, "-l")) {
 			opt_dlls.push_back(parm());
 		} else if (!strcmp(s, "--networkprovider")) {
@@ -1055,6 +1078,15 @@ int main(int argc, const char** argv) {
 			for (int i = 0; i < argc; ++i) {
 				argv.push_back(src);
 				src += strlen(src) + 1;
+			}
+
+			const auto envGameSpeed = get_env_var("BWHEADLESS_GAME_SPEED");
+			const auto parsedGameSpeed = GameSpeed::parse(envGameSpeed);
+			if (parsedGameSpeed.has_value()) {
+				opt_game_speed = parsedGameSpeed.value();
+			} else {
+				log("%s: error: failed to parse environment variable: BWHEADLESS_GAME_SPEED: %s\n", argv[0], envGameSpeed);
+				fatal_error("failed to parse environment variable: BWHEADLESS_GAME_SPEED");
 			}
 
 			int r = parse_args(argc, argv.data());
