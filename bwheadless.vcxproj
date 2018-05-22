@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -10,12 +10,13 @@
     <ProjectGuid>{2B04FFDC-5E9C-4E73-921C-109DB247620E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>bwheadless</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -40,6 +41,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -52,12 +54,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="codegen.h" />
+    <ClInclude Include="game_speed.h" />
     <ClInclude Include="load_pe.h" />
     <ClInclude Include="sc_hook.h" />
     <ClInclude Include="strf.h" />
     <ClInclude Include="x86dec.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="game_speed.cpp" />
     <ClCompile Include="inject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sc_hook.cpp" />

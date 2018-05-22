@@ -30,6 +30,9 @@
     <ClInclude Include="strf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game_speed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inject.cpp">
@@ -39,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sc_hook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game_speed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
